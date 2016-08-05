@@ -1,10 +1,15 @@
 <!doctype html>
 <html>
 <head>
-   <meta charset="utf-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>
+
   <style>
-    body {background-color: #ccc;}
+    body, * {
+      background-color: #ccc;
+      font-family: Inconsolata, serif;
+    }
     .gallery-item {
       display: inline-block;
       padding: 9px;
@@ -51,30 +56,47 @@ SVG_OPTS.h = 50;
 SVG_OPTS.shape = 'pin';
 
 // Allow color names
-colors = {
+primary_colors = {
   red: '#ff0000',
   orange: '#FF7F00',
   yellow: '#ffff00',
   green: '#008000',
-  cb_green: '#33A02C',
-  blue: '#0000ff',
-  purple: '#7F00FF',
-  cyan: '#00FFFF',
-  magenta: '#FF00FF',
+  azure: '#007FFF',
+  not_purple: '#7F00FF',
+  purple: '#800080'
+};
+colors = {
+  spectral_red: '#d7191c',
+  tuscan_red: '#B21F29',
   pink: '#FFC0CB',
-  brown: '#804000',
+  "magenta/fuchsia": '#FF00FF',
+
+  cantelope_orange: '#fdbf6f',
+
+  lime: '#00FF00',
+  whispy_green: '#b2df8a',
+  cb_green: '#33A02C',
+  forest: '#228B22',
+  dark_green: '#006400',
+
+  blue: '#0000ff',
+  "cyan/aqua": '#00FFFF',
   cerulean: '#004D95',
   celeste: '#B2FFFF',
-  azure: '#007FFF',
+  turquoise: '#40E0D0',
+  teal: '#008080',
   royal: '#4169E1',
   navy: '#000080',
+  dreary_blue: '#a6cee3',
+
+  'cyanish': '#00FFCC',
+  'cyanish2': '#00ccaa',
+
+  lavender: '#cab2d6',
+  dirty_purple: '#977BB6',
   brown: '#804000',
-  forest: '#228B22',
-  'Reviewed': '#1A8180',
-  'Not Reviewed': '#00FFCC',
-  'Not Reviewed2': '#00ccaa',
-  dark_green: '#006400'
 };
+
 SVG_OPTS.colors = colors;
 
 /*for each color:
@@ -83,6 +105,28 @@ SVG_OPTS.colors = colors;
 */
 
 // not needed: window.open().location = document.getElementsByTagName("canvas")[0].toDataURL("image/png");
+
+function processHexAndHalfTones(hex){
+  opts.stroke = hex;
+  opts.color_name = clr;
+  opts['stroke-width'] = 11;
+  var r = hexToR(cutHex(hex));
+  var g = hexToG(cutHex(hex));
+  var b = hexToB(cutHex(hex));
+  var rgb_arr = rgba2rgb(r,g,b,opac);
+
+  var half_clr = 'rgb(' +
+    rgb_arr[0] +
+    ',' +
+    rgb_arr[1] +
+    ',' +
+    rgb_arr[2] +
+    ')';
+  opts.fill = half_clr;
+
+  addCanvas(clr,opts);
+  addCanvas2(clr,opts);
+}
 
 function addCanvas(color,opts) {
   // yes: opts.w = opts.h = 200; (leave vb=100)
@@ -172,29 +216,20 @@ console.log(style_str);
   opts.w = 26;
   var opac = 0.6;
 
+
+for (var clr in primary_colors) {
+  processHexAndHalfTones(primary_colors[clr]);
+}
+
+var hr = document.createElement('hr');
+document.getElementsByTagName('body')[0].appendChild(hr);
+
 for (var clr in colors) {
-  //var opts = {};
-  //var opts = setOpts(clr, colors[clr]);
-  opts.stroke = colors[clr];
-  opts.color_name = clr;
-  opts['stroke-width'] = 6;
-  var r = hexToR(cutHex(colors[clr]));
-  var g = hexToG(cutHex(colors[clr]));
-  var b = hexToB(cutHex(colors[clr]));
-  var rgb_arr = rgba2rgb(r,g,b,opac);
-
-  var half_clr = 'rgb(' +
-    rgb_arr[0] +
-    ',' +
-    rgb_arr[1] +
-    ',' +
-    rgb_arr[2] +
-    ')';
-  opts.fill = half_clr;
-
-  addCanvas(clr,opts);
-  addCanvas2(clr,opts);
+  processHexAndHalfTones(colors[clr]);
 };
+
+var hr = document.createElement('hr');
+document.getElementsByTagName('body')[0].appendChild(hr);
 
 
 document.getElementsByTagName('body')[0].appendChild(document.createElement('div'));
@@ -226,6 +261,8 @@ for (var i = 0; i < colorbrewer.Spectral[N].length; i++) {
   addCanvas2(clr,opts);
 };
 
+var hr = document.createElement('hr');
+document.getElementsByTagName('body')[0].appendChild(hr);
 
 document.getElementsByTagName('body')[0].appendChild(document.createElement('div'));
 
@@ -257,6 +294,8 @@ for (var i = 0; i < colorbrewer.Spectral[N].length; i++) {
   addCanvas2(clr,opts);
 };
 
+var hr = document.createElement('hr');
+document.getElementsByTagName('body')[0].appendChild(hr);
 
 var graygreys = [];
 // Or for 5,6,7... keep five chars equal and decrement one to 7
@@ -294,6 +333,9 @@ for (var i = 0; i < graygreys.length; i++) {
   addCanvas(clr,opts);
   addCanvas2(clr,opts);
 };
+
+var hr = document.createElement('hr');
+document.getElementsByTagName('body')[0].appendChild(hr);
 
 //updateSVG(NEW_OPTS);
 /*
