@@ -97,6 +97,10 @@ colors = {
   brown: '#804000',
 };
 
+
+// http://localhost:8000/misc/color/52c273a9ad4e893de493/
+var cubehelix10 = {"0.02":"#e65640","0.11":"#b6790c","0.21":"#719d04","0.33":"#31b62b","0.43":"#0fba72","0.52":"#18a8be","0.61":"#4885f2","0.71":"#8d61fa","0.83":"#cd48d3","0.93":"#ef448c"};
+
 SVG_OPTS.colors = colors;
 
 /*for each color:
@@ -226,6 +230,13 @@ document.getElementsByTagName('body')[0].appendChild(hr);
 
 for (var clr in colors) {
   processHexAndHalfTones(colors[clr]);
+};
+
+var hr = document.createElement('hr');
+document.getElementsByTagName('body')[0].appendChild(hr);
+
+for (var clr in cubehelix10) {
+  processHexAndHalfTones(cubehelix10[clr]);
 };
 
 var hr = document.createElement('hr');
