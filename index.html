@@ -65,6 +65,20 @@ primary_colors = {
   not_purple: '#7F00FF',
   purple: '#800080'
 };
+primary_plus_colors = {
+  red: '#ff0000',
+  redOrange: '#ef4623',
+  orange: '#FF7F00',
+  yellowOrange: '#fdb51e',
+  yellow: '#ffff00',
+  yellowGreen: '#9fc33e',
+  green: '#008000',
+  blueGreen: '#21409a',
+  azure: '#007FFF',
+  bluePurple: '#f83f99',
+  not_purple: '#7F00FF',
+  //purple: '#800080'
+};
 colors = {
   spectral_red: '#d7191c',
   tuscan_red: '#B21F29',
@@ -223,6 +237,13 @@ console.log(style_str);
 
 for (var clr in primary_colors) {
   processHexAndHalfTones(primary_colors[clr]);
+}
+
+var hr = document.createElement('hr');
+document.getElementsByTagName('body')[0].appendChild(hr);
+
+for (var clr in primary_plus_colors) {
+  processHexAndHalfTones(primary_plus_colors[clr]);
 }
 
 var hr = document.createElement('hr');
