@@ -80,6 +80,42 @@ primary_plus_colors = {
   not_purple2: '#7F00FF',
   purple2: '#800080'
 };
+
+// http://mkweb.bcgsc.ca/colorblind/img/colorblindness.palettes.simple.png
+deuteranopia_colors = {
+  deut_red: '#AA0A3C',
+  //deut_orange: '#FA7850',
+  //deut_peach: '#FAE6BE',
+  deut_yellow: '#ffff00',
+  deut_yellowgreen: '#A0FA82',
+  deut_green: '#088C46',
+  deut_cyanish: '#14D2DC',
+  deut_azurish: '#00A0FA',
+  deut_blue: '#005AC8',
+  deut_turquoise: '#006E82',
+  deut_purple: '#8214A0',
+  deut_pink: '#FA78FA'
+};
+
+primary_plus_colors2 = {
+  darkRed3: '#B21F29',
+  red3: '#ff0000',
+  // pink3: '#ef448c',
+  // magenta3: '#FF00FF',
+  orange3: '#FF7F00',
+  // yellowOrange3: '#fdb51e',
+  yellow3: '#ffff00',
+  // yellowGreen3: '#9fc33e',
+  lime3: '#00FF00',
+  green3: '#008000',
+  // blueGreen3: '#157D83',
+  azure3: '#0080FF',
+  blue3: '#0000FF',
+  //bluePurple: '#f83f99',
+  not_purple3: '#7F00FF',
+  purple3: '#800080',
+  // brown3: '#804000'
+};
 colors = {
   spectral_red: '#d7191c',
   tuscan_red: '#B21F29',
@@ -233,7 +269,7 @@ console.log(style_str);
 
   opts.h = 26;
   opts.w = 26;
-  var opac = 0.6;
+  var opac = 0.2;
 
 
 for (var clr in primary_colors) {
@@ -245,6 +281,13 @@ document.getElementsByTagName('body')[0].appendChild(hr);
 
 for (var clr in primary_plus_colors) {
   processHexAndHalfTones(primary_plus_colors[clr]);
+}
+
+var hr = document.createElement('hr');
+document.getElementsByTagName('body')[0].appendChild(hr);
+
+for (var clr in deuteranopia_colors) {
+  processHexAndHalfTones(deuteranopia_colors[clr]);
 }
 
 var hr = document.createElement('hr');
