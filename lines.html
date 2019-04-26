@@ -1,0 +1,546 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Color Palettes</title>
+  <script src="assets/d3.v4.min.js" charset="utf-8"></script>
+  <script src="assets/d3-scale-chromatic.v1.min.js" charset="utf-8"></script>
+  <!--
+  <script src="assets/colormatrix.js"></script>
+  <script src="assets/cmjmk-web.js"></script>
+  -->
+  <script src="assets/coolermatrix.js"></script>
+  <script src="assets/colorbrewer.min.js"></script>
+  <script src="assets/colorbrewer.uggo.js"></script>
+
+  <script src="assets/jquery.min.js"></script>
+  <script>window.jQuery || document.write('<script src="/assets/js/vendor/jquery.min.js"><\/script>')</script>
+
+  <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" crossorigin="anonymous">
+  <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
+
+  <!--
+    <link rel="stylesheet" href="assets/grayscale.min.css">
+  -->
+
+  <style>
+    body, * {
+      background-color: #ddd;
+      font-family: Menlo, monospace;
+      font-size: 12px;
+    }
+
+    #main {
+      margin: 5px;
+    }
+    .gallery-item {
+      display: inline-block;
+      padding: 9px;
+    }
+    .swatch-grp {
+      height: auto;
+      margin: 5px;
+      display: inline-block;
+      width: 600px;
+      overflow: hidden;
+    }
+    .swatch {
+      width: 200px;
+      height: 6px;
+    }
+    .pair-grp {
+      margin: 0 0 2px 0;
+    }
+    .pair-label {
+      display: inline-block;
+      font-size: 10px;
+      // line-height: 10px;
+      vertical-align: top;
+      text-align: center;
+      width: 80px;
+      margin-left: 20px;
+    }
+
+    /* https://bootstrapbay.com/blog/bootstrap-button-styles/ */
+
+    .btn.outline {
+        background: none;
+        padding: 2px 4px;
+        font-size: 12px;
+        border-radius: 0px;
+    }
+
+    .btn-primary.outline {
+        border: 1px solid #334;
+        color: #334;
+    }
+    .btn-primary.outline:hover,
+     .btn-primary.outline:focus,
+     .btn-primary.outline:active,
+     .btn-primary.outline.active,
+     .open > .dropdown-toggle.btn-primary {
+        // color: #eef;
+        // border-color: #eef;
+    }
+    .btn-primary.outline:active,
+     .btn-primary.outline.active {
+        border-color: #007299;
+        color: #007299;
+        box-shadow: none;
+        background-color: rgba(255,255,255,0.5);
+    }
+
+    .btn:focus, .btn:active:focus, .btn.active:focus {
+        outline: 2px auto -webkit-focus-ring-color;
+        outline-offset: -2px;
+    }
+
+    #palette-group-wrapper {
+        // width: 150px;
+        display: inline-block;
+    }
+    .palette-row {
+        display: flex;
+        padding: 1px;
+        border: 1px solid #eee;
+        /*
+        */
+    }
+    .palette-row:hover {
+        border: 1px solid #333;
+        background-color: #fff;
+    }
+    .swatch-sq {
+        display: inline-block;
+        width: 15px;
+        height: 15px;
+        border: 0px solid #f00;
+        background-color: #2af;
+    }
+    #current-palette {
+        border: 1px solid #999;
+    }
+    .inline-block{
+        display: inline-block;
+        /*border: 1px dotted gray;
+        vertical-align: top;*/
+    }
+    #palette-list-wrapper {
+        display: flex;
+    }
+  </style>
+
+</head>
+<body>
+
+
+<!-- https://fontawesome.com/get-started/svg-with-js -->
+<script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js" integrity="sha384-xymdQtn1n3lH2wcu0qhcdaOpQwyoarkgLVxC/wZ5q7h9gHtxICrpcaSUfygqZGOe" crossorigin="anonymous"></script>
+
+<div>
+    fontawesome <i class="fas fa-home"></i>
+</div>
+
+<script type="text/javascript">
+
+    $('svg').click(function(){
+        console.log("fa", this);
+        // on click, append b64_str
+        // var s = new XMLSerializer().serializeToString(document.getElementById("svg"))
+        var s = new XMLSerializer().serializeToString(this);
+        var b64_str = window.btoa(s);
+        $(this).after(`<div>${b64_str}</div>`);
+    });
+
+
+</script>
+
+
+    <div id="auto-wrapper">
+        <div id="palette-group-wrapper">
+            <div id="current-palette-wrapper" class="inline-block">
+                <div id="current-palette" data-toggle="collapse" href="#palette-list" class="inline-block">
+                    <div class="palette-row"></div>
+                </div>
+                <button id="btn-palette-reverse" title="Flip"><span class="fxwp-btn-content">⇆</span></button>
+            </div>
+
+            <div id="palette-list-wrapper">
+            <div id="palette-list" class="panel-collapse collapse">
+            </div>
+            </div>
+        </div>
+    </div>
+
+<div id="main"></div>
+
+
+
+<script type="text/javascript">
+
+var A = {};
+A.palettes = [];
+
+var walk_ped = {
+  orange: '#FF7F00',
+  yellow: '#FFFF00',
+  // green: '#3db83d', // irish / islamic
+  green: '#66cc66', //
+  forest_green: '#008000', // forest green
+  // green: '#9fc33e', // yellow-olive
+  // green: '#A0FA82', // dull mint
+  azure: '#007FFF',
+  purple: '#800080'
+};
+
+var water_colors = {
+  lake: '#00FFFF',
+  wetland: 'rgba(48,149,41,1)',
+  bay: 'rgba(31, 120, 180,1)',
+  reservoir: 'rgba(140, 105, 229,1)',
+};
+
+var default_colors = {
+  red: '#FF0000',
+  orange: '#FF7F00',
+  yellow: '#FFFF00',
+  green: '#008000',
+  azure: '#007FFF',
+  not_purple: '#7F00FF',
+  purple: '#800080'
+};
+
+var primary_colors = {
+  red: '#FF0000',
+  orange: '#FF7F00',
+  yellow: '#FFFF00',
+  green: '#008000',
+  azure: '#007FFF',
+  not_purple: '#7F00FF',
+  purple: '#800080'
+};
+
+var primary_plus_colors = {
+  darkRed: '#B21F29',
+  red: '#FF0000',
+  //redOrange: '#ef4623',
+  orange: '#FF7F00',
+  yellowOrange: '#fdb51e',
+  yellow: '#FFFF00',
+  yellowGreen: '#9fc33e',
+  green: '#008000',
+  //blueGreen: '#157D83',
+  chicagoBlue: '#32AEE5',
+  azure: '#007FFF',
+  //bluePurple: '#f83f99',
+  not_purple: '#7F00FF',
+  magenta: '#FF00FF',
+  // purple: '#800080'
+};
+
+var cbSpectral = copyJSON(colorbrewer.Spectral[11]);
+
+// http://mkweb.bcgsc.ca/colorblind/img/colorblindness.palettes.simple.png
+var deuteranopia_colors = {
+  deut_red: '#AA0A3C',
+  //deut_orange: '#FA7850',
+  //deut_peach: '#FAE6BE',
+  deut_yellow: '#FFFF00',
+  deut_yellowgreen: '#A0FA82',
+  deut_green: '#088C46',
+  deut_cyanish: '#14D2DC',
+  deut_azurish: '#00A0FA',
+  deut_blue: '#005AC8',
+  deut_turquoise: '#006E82',
+  deut_purple: '#8214A0',
+  deut_pink: '#FA78FA'
+};
+
+var cubehelix10 = {"0.02":"#e65640","0.11":"#b6790c","0.21":"#719d04","0.33":"#31b62b","0.43":"#0fba72","0.52":"#18a8be","0.61":"#4885f2","0.71":"#8d61fa","0.83":"#cd48d3","0.93":"#ef448c"};
+
+/*Object.values(colorbrewer["UggoSpectral"]).forEach((x, xi) => {
+*/
+for (var num in colorbrewer["UggoSpectral"]) {
+    console.log(num);
+    console.log(colorbrewer["UggoSpectral"][num]);
+    A.palettes.push({ "name": num, "colors": colorbrewer["UggoSpectral"][num] });
+}
+
+A.palettes.push({ "name": "walk_ped", "colors": objectValuesToArray(walk_ped) });
+A.palettes.push({ "name": "water_colors", "colors": objectValuesToArray(water_colors) });
+A.palettes.push({ "name": "primary_colors", "colors": objectValuesToArray(primary_colors) });
+A.palettes.push({ "name": "primary_plus_colors", "colors": objectValuesToArray(primary_plus_colors) });
+A.palettes.push({ "name": "colorbrewer.Spectral[11]", "colors": cbSpectral });
+A.palettes.push({ "name": "deuteranopia_colors", "colors": objectValuesToArray(deuteranopia_colors) });
+A.palettes.push({ "name": "cubehelix10", "colors": objectValuesToArray(cubehelix10) });
+
+d3.select('#main')
+  .append('div')
+    .append('button')
+    .attr('href',`#`)
+    .attr('class','btn outline btn-primary')
+    .attr('data-toggle',`collapse`)
+    .attr('data-target','.swatch-grp')
+    .html('Toggle all')
+
+d3.select('#main').append('hr');
+
+
+A.palettes.forEach((p) => {
+  var grp = d3.select('#main')
+    .append('grp')
+      .attr('class','palette-grp')
+  ;
+
+  grp.append('button')
+    .attr('href',`#palette-${p.name}`)
+    .attr('class','btn outline btn-primary')
+    // .attr('class','btn btn-primary')
+    // .attr('class','btn')
+    .attr('data-toggle',`collapse`)
+    .attr('data-target',`#palette-${p.name}`)
+    .html(p.name)
+  ;
+
+
+  // Add the group for the swatches
+  var swatchGrp = grp.append('div')
+    .attr('id',`palette-${p.name}`)
+    .attr('class','swatch-grp collapse in')
+  ;
+
+  // Add colors pairwise
+
+  p.colors.forEach((c,i) => {
+    var pairGrp = swatchGrp.append('div')
+      .attr('class','pair-grp')
+    ;
+
+    pairGrp.append('div')
+      .attr('class','pair-label')
+      .html((i+1) + " " + c)
+    ;
+
+    var pairSwatches = pairGrp.append('div')
+      .attr('class','pair-swatches')
+      .attr('style','display: inline-block')
+      ;
+
+    pairSwatches.append('div')
+      .attr('class','swatch')
+      .style('background-color', c)
+    ;
+    pairSwatches.append('div')
+      .attr('class','swatch')
+      .style('background-color', p.colors[i+1] || p.colors[0])
+    ;
+
+    // Add colors pairwise again, but with color-blindness filter
+    // cRGBA = hex2rgba(c);
+    cRGBA = [
+      hexToR(c),
+      hexToG(c),
+      hexToB(c),
+      1
+    ];
+
+    c1 = p.colors[i+1] ? p.colors[i+1] : p.colors[0];
+
+    cRGBA1 = [
+      hexToR(c1),
+      hexToG(c1),
+      hexToB(c1),
+      1
+    ];
+
+    var colorMatrix = new coolermatrix.ColorMatrix();
+    newC = colorMatrix.transform(cRGBA, 'deuteranopia');
+    newC = "rgba(" + newC.join(",") + ")";
+    newHex = rgb2hex(newC);
+
+    newC1 = colorMatrix.transform(cRGBA1, 'deuteranopia');
+    newC1 = "rgba(" + newC1.join(",") + ")";
+    newHex1 = rgb2hex(newC1);
+
+    pairGrp.append('div')
+      .attr('class','pair-label')
+      .html((i+1) + " " + newHex)
+    ;
+
+    var pairSwatches = pairGrp.append('div')
+      .attr('class','pair-swatches')
+      .attr('style','display: inline-block')
+      ;
+
+    pairSwatches.append('div')
+      .attr('class','swatch')
+      .style('background-color', newHex)
+    ;
+    pairSwatches.append('div')
+      .attr('class','swatch')
+      .style('background-color', newHex1)
+    ;
+
+  })
+
+  grp.append('hr');
+
+});
+
+
+    initPalettePicker();
+
+    function initPalettePicker() {
+        // colorbrewer = {YlGn: {…}
+        // want data = [{YlGn: [8colors]}, {}, ]
+        /*var arrayOfPalettes = Object.keys(colorbrewer).map(x => {
+            console.log(x);
+            return colorbrewer[x]["8"] || [];
+        });*/
+
+        var cb8Palettes = Object.keys(colorbrewer).map(x => {
+            // return colorbrewer[x]["8"] || [];
+            var ret = {"title": "title", "colors": []};
+            ret.title = x;
+            ret.colors = colorbrewer[x]["8"] || [];
+            return ret;
+        });
+        var arrayOfPalettes = cb8Palettes;
+
+
+        // Add an empty container row for each of the palettes
+        var paletteRows = d3.select('#palette-list')
+            .selectAll('.palette-row')
+            .data(arrayOfPalettes)
+            .enter()
+            .append('div')
+                .attr('class','palette-row')
+                .attr('title',function(d, di){
+                    // console.log(Object.keys(d)[di]); // "YlGn"
+                    return d.title;
+                })
+                .attr('id', function(d){
+                    return d.title;
+                })
+                .on('click', function(){
+                    // copy this palette to #current-palette
+                    cloneClearAndAppend( this, document.querySelector('#current-palette') );
+                    // collapse the palette picker
+                    document.querySelector('#current-palette').click();
+                })
+                ;
+
+        // Add the colored swatches for each palette
+        paletteRows.selectAll('.swatch')
+            .data(function(dd,di){
+                return dd.colors
+            })
+            .enter()
+            .append('div')
+                .attr('class','swatch-sq')
+                .attr('style', function(d){
+                    // console.log(d);
+                    return "background-color: " + d;
+                })
+                ;
+
+        d3.select('#btn-palette-reverse').on('click', function(){
+            reverseEls( document.querySelector('#current-palette').querySelector('.palette-row') );
+        });
+
+        cloneClearAndAppend( document.querySelector('#UggoSpectral'), document.querySelector('#current-palette') );
+    } // end initPalettePicker()
+
+
+// PlainJS helper functions
+
+/*getAjax("./static/js/protos_landcover_type.json", function(data){
+    console.log(data);
+});*/
+
+function getAjax(url, success) {
+    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    xhr.open('GET', url);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState>3 && xhr.status==200) success(xhr.responseText);
+    };
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.send();
+    return xhr;
+}
+
+function cloneClearAndAppend(nodeToClone, destinationNode) {
+    console.log("nodeToClone", nodeToClone);
+    // var destinationNode = document.querySelector(destinationSelector);
+    // First empty the container
+    while (destinationNode.firstChild) {
+      destinationNode.removeChild(destinationNode.firstChild);
+    }
+    // Then make the clone and insert/append it
+    // var clone = this.cloneNode(true);
+    var clone = nodeToClone.cloneNode(true);
+    // var clone = document.querySelector(cloneSelector).cloneNode(true);
+    destinationNode.appendChild(clone);
+}
+
+function reverseEls(elem){
+    for (var i=0; i<elem.childNodes.length; i++)
+        elem.insertBefore(elem.childNodes[i], elem.firstChild);
+}
+
+
+function objectValuesToArray(obj) {
+  var arr = [];
+  Object.keys(obj).forEach((k) => {
+    arr.push(obj[k]);
+  });
+  return arr;
+}
+
+function rgba2rgb(r,g,b,a) {
+  bg = {r: 255, g: 255, b: 255};
+  r2 = (1-a) * r + (a * bg.r);
+  g2 = (1-a) * g + (a * bg.g);
+  b2 = (1-a) * b + (a * bg.b);
+
+  r2 = r2>255 ? 255 : r2;
+  g2 = g2>255 ? 255 : g2;
+  b2 = b2>255 ? 255 : b2;
+
+  rgb_arr = [parseInt(r2),parseInt(g2),parseInt(b2)];
+  return rgb_arr;
+}
+//a=rgba2rgb(255,0,0,0.5);
+
+function hex2rgba(hex,opacity){
+    R = hexToR(hex);
+    G = hexToG(hex);
+    B = hexToB(hex);
+    opacity = opacity || 1;
+    rgba = 'rgba('+R+','+G+','+B+','+opacity+')';
+    return rgba;
+}
+
+function hexToR(h) {return parseInt((cutHex(h)).substring(0,2),16);}
+function hexToG(h) {return parseInt((cutHex(h)).substring(2,4),16);}
+function hexToB(h) {return parseInt((cutHex(h)).substring(4,6),16);}
+function cutHex(h) {return (h.charAt(0)=="#") ? h.substring(1,7):h;}
+
+function rgb2hex(rgb){
+ rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+ return (rgb && rgb.length === 4) ? "#" +
+  ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
+  ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
+  ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
+}
+
+function copyJSON(json) { return JSON.parse(JSON.stringify(json)); }
+
+</script>
+
+</body>
+
+</html>
+

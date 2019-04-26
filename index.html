@@ -17,11 +17,34 @@
   </style>
 </head>
 <body>
+
+
+  <textarea id="svg2png-textarea" rows="10" cols="100">
+    <svg width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+     <g>
+      <circle r="10" cx="22" cy="12" stroke-width="1.5" stroke="#22aaff" fill="none"/>
+      <circle r="10" cx="12" cy="29.3" stroke-width="1.5" stroke="#ff8000" fill="none"/>
+      <circle r="10" cx="32" cy="29.3" stroke-width="1.5" stroke="#33aa33" fill="none"/>
+     </g>
+    </svg>
+  </textarea>
+  <button id="btn-svg2png">svg2png</button>
+  <div id="svg2png-result"></div>
+  <textarea id="svg2png-result-textarea" rows="10" cols="100"></textarea>
+  <hr/>
+
+
   <!-- <canvas id="canvas" style="border:1px dotted gray;" width="200" height="200">
   </canvas> -->
 
 <script type="text/javascript">
 /*
+
+svg2png
+png2base64
+svg2png2base64
+
+
 DDD (doctn-drivn-dev)
 API params:
     width
@@ -41,6 +64,46 @@ EDITOR:
     stroke-width
     array inputs for iteration? (multiselect?)
 */
+
+document.querySelector('#btn-svg2png').onclick = svg2png2base64;
+
+
+function svgTextToPng(){
+  fill = 'none';
+  stroke = '#22aaff';
+  strokeWidth = 3;
+  svgW = 100;
+  style_str = `fill:${fill}; stroke:${stroke}; stroke-width: ${strokeWidth}`;
+  console.log(style_str);
+  var svg_str = document.querySelector('#svg2png-textarea').textContent;
+  console.log(svg_str);
+
+  var canvas = document.createElement('canvas');
+  canvas.width = svgW;
+  canvas.height = svgW;
+  var ctx = canvas.getContext('2d');
+  //canvas.setAttribute("id", opts.color_name);
+  canvas.setAttribute("title", opts.color_name + ': ' + opts.stroke);
+  document.getElementById('svg2png-result').appendChild(canvas);
+
+  var DOMURL = window.URL || window.webkitURL || window;
+
+  var img = new Image(); // dumb Image
+  var svg = new Blob([svg_str], {type: 'image/svg+xml;charset=utf-8'}); // an svg Blob we define
+  var url = DOMURL.createObjectURL(svg); // the url of our svg
+
+  img.onload = function () {
+    ctx.drawImage(img, 0, 0); // draw the dumb image to the canvase
+    DOMURL.revokeObjectURL(url); //
+  }
+
+  img.src = url; // Finally, set the source of the dumb image to the url of our custom svg
+
+  svg2png2base64str = canvas.toDataURL();
+  console.log(svg2png2base64str);
+  document.querySelector('#svg2png-result-textarea').textContent = svg2png2base64str;
+}
+
 
 // http://bl.ocks.org/mbostock/5577023 format (doesn't have names for colors)
 var colorbrewer={Spectral:{3:["#fc8d59","#ffffbf","#99d594"],4:["#d7191c","#fdae61","#abdda4","#2b83ba"],5:["#d7191c","#fdae61","#ffffbf","#abdda4","#2b83ba"],6:["#d53e4f","#fc8d59","#fee08b","#e6f598","#99d594","#3288bd"],7:["#d53e4f","#fc8d59","#fee08b","#ffffbf","#e6f598","#99d594","#3288bd"],8:["#d53e4f","#f46d43","#fdae61","#fee08b","#e6f598","#abdda4","#66c2a5","#3288bd"],9:["#d53e4f","#f46d43","#fdae61","#fee08b","#ffffbf","#e6f598","#abdda4","#66c2a5","#3288bd"],10:["#9e0142","#d53e4f","#f46d43","#fdae61","#fee08b","#e6f598","#abdda4","#66c2a5","#3288bd","#5e4fa2"],11:["#9e0142","#d53e4f","#f46d43","#fdae61","#fee08b","#ffffbf","#e6f598","#abdda4","#66c2a5","#3288bd","#5e4fa2"]}};
@@ -161,6 +224,67 @@ SVG_OPTS.colors = colors;
 
 // not needed: window.open().location = document.getElementsByTagName("canvas")[0].toDataURL("image/png");
 
+document.addEventListener('click', function (event) {
+
+  if (event.target.matches('canvas')) {
+    console.log(event.target);
+    console.log(event.target.toDataURL());
+    // , this.toDataURL());
+    document.querySelector('#svg2png-result-textarea').value = event.target.toDataURL();
+  }
+
+}, false);
+
+
+var svg_str;
+
+function svg2png2base64() {
+  /*svg_str = `<svg width="48" height="48" xmlns="http://www.w3.org/2000/svg">
+     <g>
+      <circle r="10" cx="22" cy="12" stroke-width="1.5" stroke="#22aaff" fill="none"/>
+      <circle r="10" cx="12" cy="29.3" stroke-width="1.5" stroke="#ffff00" fill="none"/>
+      <circle r="10" cx="32" cy="29.3" stroke-width="1.5" stroke="#33aa33" fill="none"/>
+     </g>
+    </svg>
+  `;
+*/
+  // document.querySelector('#svg2png-textarea').value = svg_str;
+  svg_str = document.querySelector('#svg2png-textarea').value;
+
+  var div = document.createElement('div');
+  div.setAttribute('class', 'gallery-item');
+  div.innerHTML = 'test<br />';
+  document.getElementsByTagName('body')[0].appendChild(div);
+
+  var canvas = document.createElement('canvas');
+  canvas.width = 150;
+  canvas.height = 150;
+  canvas.id = 'new-canvas';
+  var ctx = canvas.getContext('2d');
+  document.querySelector('#svg2png-result').appendChild(canvas);
+
+  /*  First write svg to hidden div
+  so we can then change its width/height etc
+  Then use that div's innerHTML to create the Blob to send to canvas
+  */
+
+  var DOMURL = window.URL || window.webkitURL || window;
+
+  var img = new Image(); // dumb Image
+  var svg = new Blob([svg_str], {type: 'image/svg+xml;charset=utf-8'}); // an svg Blob we define
+  // var svg = new Blob([svg_str], {type: 'image/png'}); // an svg Blob we define
+  var url = DOMURL.createObjectURL(svg); // the url of our svg
+
+  img.onload = function () {
+    ctx.drawImage(img, 0, 0); // draw the dumb image to the canvase
+    DOMURL.revokeObjectURL(url); //
+  }
+
+  img.src = url; // Finally, set the source of the dumb image to the url of our custom svg
+
+}
+
+
 function processHexAndHalfTones(hex){
   opts.stroke = hex;
   opts.color_name = clr;
@@ -186,7 +310,6 @@ function processHexAndHalfTones(hex){
 function addCanvas(color,opts) {
   // yes: opts.w = opts.h = 200; (leave vb=100)
   style_str = 'fill:' + opts.fill + ';stroke:' + opts.stroke + ';stroke-width:' + opts['stroke-width'];
-  console.log(style_str);
 
   //var data = '<svg xmlns="http://www.w3.org/2000/svg" width="'+opts.w+'px" height="'+opts.h+'px" viewBox="0 0 '+2*opts.w+' '+2*opts.h+'"  > \
   //var data = '<svg xmlns="http://www.w3.org/2000/svg" style="border: 1px dotted #f00;" width="30px" height="30px" viewBox="0 0 190 190"  > \
@@ -470,7 +593,6 @@ function cutHex(h) {return (h.charAt(0)=="#") ? h.substring(1,7):h;}
 function addCanvas2(color,opts) {
   // yes: opts.w = opts.h = 200; (leave vb=100)
   style_str = 'fill:' + opts.fill + ';stroke:' + opts.stroke + ';stroke-width:' + opts['stroke-width'];
-  console.log(style_str);
 
   //var data = '<svg xmlns="http://www.w3.org/2000/svg" width="'+opts.w+'px" height="'+opts.h+'px" viewBox="0 0 '+2*opts.w+' '+2*opts.h+'"  > \
   //var data = '<svg xmlns="http://www.w3.org/2000/svg" style="border: 1px dotted #f00;" width="30px" height="30px" viewBox="0 0 190 190"  > \
